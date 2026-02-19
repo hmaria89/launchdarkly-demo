@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABC Company - SaaS Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: #f5f7fa;
+            color: #2c3e50;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .tagline {
+            color: #7f8c8d;
+            font-size: 1.2em;
+        }
+        
+        /* Premium support banner - controlled by LaunchDarkly flag */
+        #premium-banner {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: none;
+            animation: slideDown 0.5s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        #premium-banner h2 {
+            font-size: 2em;
+            margin-bottom: 15px;
+        }
+        
+        #premium-banner p {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+        
+        .cta-button {
+            background: white;
+            color: #667eea;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .main-content {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        .feature {
+            padding: 20px;
+            border-left: 4px solid #667eea;
+            background: #f8f9fa;
+        }
+        
+        .feature h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        /* Debug panel shows connection status and current user context */
+        .debug-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #2c3e50;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.85em;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            max-width: 300px;
+        }
+        
+        .debug-panel .section {
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #34495e;
+        }
+        
+        .debug-panel .section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .debug-panel .label {
+            color: #95a5a6;
+            font-size: 0.8em;
+            margin-bottom: 3px;
+        }
+        
+        .status-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .status-dot.connected {
+            background: #2ecc71;
+        }
+        
+        .status-dot.disconnected {
+            background: #e74c3c;
+        }
+        
+        /* Helper banner for testing different user scenarios */
+        .url-helper {
+            background: #3498db;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+        }
+        
+        .url-helper strong {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 1.1em;
+        }
+        
+        .url-helper code {
+            background: rgba(255,255,255,0.2);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>ABC Company</h1>
+            <p class="tagline">Enterprise SaaS Platform - Serving 40,000+ Daily Users</p>
+        </header>
+        
+        <!-- URL parameters simulate different user types for testing targeting rules -->
+        <div class="url-helper" id="url-helper">
+            <strong>Testing Targeting Scenarios</strong>
+            Try these URLs to see different user experiences:
+            <ul style="margin-top: 8px; margin-left: 20px;">
+                <li><code>?role=internal</code> - Internal team member</li>
+                <li><code>?beta=true</code> - Beta program participant</li>
+                <li><code>?email=john@abccompany.com</code> - Specific individual</li>
+                <li><code>?role=customer</code> - Regular customer (default)</li>
+            </ul>
+        </div>
+        
+        <!-- Premium support banner - controlled by feature flag "premium-support-banner" -->
+        <div id="premium-banner">
+            <h2>Upgrade to Premium Support</h2>
+            <p>Get 24/7 expert assistance, priority response times, and dedicated account management.</p>
+            <button class="cta-button">Contact Sales Team</button>
+        </div>
+        
+        <div class="main-content">
+            <h2>Welcome to ABC Company Platform</h2>
+            <p>Our enterprise-grade SaaS solution helps teams collaborate, automate workflows, and drive business outcomes at scale.</p>
+            
+            <div class="features">
+                <div class="feature">
+                    <h3>Enterprise Security</h3>
+                    <p>SOC 2 Type II certified with end-to-end encryption</p>
+                </div>
+                <div class="feature">
+                    <h3>Real-time Collaboration</h3>
+                    <p>Work together seamlessly across teams and time zones</p>
+                </div>
+                <div class="feature">
+                    <h3>Advanced Analytics</h3>
+                    <p>Data-driven insights to optimize your workflows</p>
+                </div>
+                <div class="feature">
+                    <h3>Powerful Integrations</h3>
+                    <p>Connect with 100+ tools your team already uses</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="debug-panel">
+        <div class="section">
+            <div class="label">CONNECTION</div>
+            <span class="status-dot disconnected" id="status-dot"></span>
+            <span id="status-text">Connecting...</span>
+        </div>
+        
+        <div class="section">
+            <div class="label">FLAG STATUS</div>
+            <div id="flag-status">Loading...</div>
+        </div>
+        
+        <div class="section">
+            <div class="label">CURRENT USER</div>
+            <div id="user-context">Loading...</div>
+        </div>
+    </div>
+
+    <!-- Load LaunchDarkly JavaScript SDK -->
+    <script src="https://unpkg.com/launchdarkly-js-client-sdk@3"></script>
+    
+    <script>
+        // REPLACE WITH YOUR CLIENT-SIDE ID from LaunchDarkly dashboard
+        // Find at: Account Settings > Projects > Environments > Client-side ID
+        const clientSideID = '698f5cdde8c0780a48d651e2';
+        
+        // Read URL parameters to simulate different users
+        const urlParams = new URLSearchParams(window.location.search);
+        const userRole = urlParams.get('role') || 'customer';
+        const userEmail = urlParams.get('email') || `user-${Date.now()}@customer.com`;
+        const isBetaTester = urlParams.get('beta') === 'true';
+        const userCompany = urlParams.get('company') || 'External Customer';
+        
+        // Create user context with attributes for targeting
+        // In production, these would come from authentication (JWT, OAuth, etc.)
+        const context = {
+            kind: 'user',
+            key: userEmail,
+            email: userEmail,
+            name: userEmail.split('@')[0],
+            userRole: userRole,
+            betaTester: isBetaTester,
+            company: userCompany,
+            timestamp: new Date().toISOString(),
+            userAgent: navigator.userAgent
+        };
+        
+        console.log('User Context Created:', context);
+        
+        // Initialize LaunchDarkly client
+        const ldClient = LDClient.initialize(clientSideID, context);
+        
+        ldClient.on('ready', function() {
+            console.log('LaunchDarkly SDK connected successfully');
+            
+            document.getElementById('status-dot').classList.remove('disconnected');
+            document.getElementById('status-dot').classList.add('connected');
+            document.getElementById('status-text').textContent = 'Connected';
+            
+            updateUserContextDisplay();
+            checkFlagAndUpdateBanner();
+            
+            // Listen for flag changes (enables instant toggle without page reload)
+            ldClient.on('change:premium-support-banner', function(newValue) {
+                console.log('Flag changed! New value:', newValue);
+                checkFlagAndUpdateBanner();
+            });
+        });
+        
+        function updateUserContextDisplay() {
+            const displayText = `
+                Email: ${context.email}<br>
+                Role: ${context.userRole}<br>
+                Beta: ${context.betaTester ? 'Yes' : 'No'}
+            `;
+            document.getElementById('user-context').innerHTML = displayText;
+        }
+        
+        // Evaluate flag and update banner visibility
+        // Flag key must match what you created in LaunchDarkly: "premium-support-banner"
+        function checkFlagAndUpdateBanner() {
+            const showBanner = ldClient.variation('premium-support-banner', false);
+            const banner = document.getElementById('premium-banner');
+            
+            console.log('Flag evaluation result:', showBanner);
+            console.log('Current user context:', context);
+            
+            if (showBanner) {
+                banner.style.display = 'block';
+                document.getElementById('flag-status').innerHTML = 'ON<br><small>Banner visible</small>';
+            } else {
+                banner.style.display = 'none';
+                document.getElementById('flag-status').innerHTML = 'OFF<br><small>Banner hidden</small>';
+            }
+        }
+        
+        // Error handling
+        ldClient.on('failed', function() {
+            console.error('Failed to connect to LaunchDarkly');
+            document.getElementById('status-text').textContent = 'Connection failed';
+            document.getElementById('premium-banner').style.display = 'none';
+        });
+    </script>
+</body>
+</html>
