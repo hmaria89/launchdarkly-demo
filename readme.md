@@ -1,294 +1,307 @@
 # LaunchDarkly Feature Management Demo
-ABC Company: Safe Feature Releases with Instant Rollback
 
-A demonstration of LaunchDarkly's feature management platform showing how organizations can deploy faster while reducing risk through controlled releases and instant remediation.
+A demonstration of LaunchDarkly's feature management platform implementing controlled feature releases, instant rollbacks, and targeted user rollouts.
 
----
-
-## Business Context
-
-ABC Company operates a SaaS platform serving 40,000+ daily users. They face a common challenge: competitors are moving faster, pressuring them to ship features more quickly, but their last rushed release broke mobile layouts and caused a flood of support tickets.
-
-**The core problem:** Traditional deployment means shipping to production equals instant visibility to all users. If something breaks, rollback requires emergency meetings, hotfix PRs, testing, and redeployment—often taking 2+ hours while customers experience degraded service.
-
-**LaunchDarkly's solution:** Decouple deployment from release. Deploy code to production safely hidden behind flags, test with internal teams in the production environment, release to customers when ready with a single toggle, and instantly disable problematic features in seconds if issues arise.
-
-**Business impact:**
-- MTTR (Mean Time to Recovery): 2 hours → 2 seconds
-- Deployment frequency: 3x increase
-- Customer-facing incidents: 75% reduction through internal testing
-- Feature velocity: Ship confidently without sacrificing quality
+**GitHub Repository:** https://github.com/hmaria89/launchdarkly-demo
 
 ---
 
-## How I Built This
+## Overview
 
-I approached this project by leveraging what I already know—enterprise software workflows from my Atlassian SE experience—and learning what I didn't, which was LaunchDarkly's SDK. Having built web applications before, including a forms project with conditional logic and Google Analytics integration, the HTML/JavaScript structure wasn't intimidating. 
+This project demonstrates two core LaunchDarkly capabilities:
 
-I used AI tools to help with LaunchDarkly-specific syntax and best practices, which taught me a lot about effective AI prompting. The real work was understanding how feature flags solve enterprise problems, and that's where my ITSM background came in handy. Framing the demo around realistic incident response workflows felt natural given my day-to-day work at Atlassian.
+**Part 1: Release & Remediate**
+- Feature flag controlling a premium support banner
+- Real-time flag updates without page reload
+- Emergency kill switch via API trigger
 
-What surprised me: this wasn't as hard as I expected. The concepts (targeting, rollbacks, context attributes) mapped directly to problems I already understand from working with JSM and DevOps customers.
-
----
-
-## What This Demo Shows
-
-### Part 1: Release & Remediate
-ABC Company wants to deploy a new "Premium Support" upsell banner on their landing page.
-
-**Capabilities:**
-- Feature flag controlling banner visibility
-- Instant toggle without page reload (change listener)
-- Emergency kill switch via API trigger (curl command)
-
-**Business value:** Deploy new revenue-generating features with zero risk. If issues arise, disable instantly before customers are impacted.
-
-### Part 2: Targeted Rollouts
-Before releasing to 40,000 daily users, ABC Company wants to test with their internal team and beta program participants.
-
-**Capabilities:**
-- Individual targeting by email address
-- Rule-based targeting by user attributes (role, beta status)
-- Context attributes for granular audience segmentation
-
-**Business value:** Test in production with real data and real traffic, but only internal users see the feature. Find and fix issues before customers are affected.
+**Part 2: Targeted Rollouts**
+- Individual user targeting
+- Rule-based targeting (by role and beta status)
+- Context attributes for audience segmentation
 
 ---
 
-## Quick Start
+## Prerequisites
 
-**Prerequisites:**
 - Python 3.x (for local web server)
-- Modern web browser
-- LaunchDarkly account (free trial available at launchdarkly.com)
+- Modern web browser (Chrome, Safari, Firefox)
+- LaunchDarkly account ([free trial](https://launchdarkly.com/start-trial/))
 
-**Setup:**
+---
+
+## Application Setup
+
+### 1. Clone the Repository
 ```bash
-# Clone the repository
-git clone [your-repo-url]
+git clone https://github.com/hmaria89/launchdarkly-demo.git
 cd launchdarkly-demo
-
-# Get your LaunchDarkly Client-side ID
-# Log in to LaunchDarkly > Account Settings > Projects > [Your Project] > Environments > Test
-# Copy the "Client-side ID"
-
-# Update index.html with your Client-side ID
-# Open index.html, find line ~210: const clientSideID = 'YOUR-CLIENT-SIDE-ID-HERE';
-# Replace with your actual ID and save
-
-# Create the feature flag in LaunchDarkly
-# Dashboard > Create flag
-# Name: "Premium Support Banner"
-# Key: premium-support-banner
-# Type: Boolean (Available/Unavailable)
-
-# Start local server
-python3 -m http.server 8000
-
-# Open browser
-# Visit: http://localhost:8000
 ```
 
-You should see the ABC Company landing page with a debug panel (bottom right) showing "Connected to LaunchDarkly" and Flag status: OFF.
+### 2. Get Your LaunchDarkly Client-side ID
 
----
+1. Log in to LaunchDarkly
+2. Navigate to **Account Settings** (gear icon) → **Projects**
+3. Select your project (or create one called "ABC Company")
+4. Go to **Environments** tab
+5. Find the **Test** environment
+6. Copy the **Client-side ID** (NOT the SDK key)
 
-## Part 1: Release & Remediate
+### 3. Update the Application Code
 
-### Feature Flag Control
+1. Open `index.html` in a text editor
+2. Find line ~210:
+```javascript
+   const clientSideID = 'YOUR-CLIENT-SIDE-ID-HERE';
+```
+3. Replace `YOUR-CLIENT-SIDE-ID-HERE` with your actual Client-side ID
+4. Save the file
 
-**Turn the feature ON:**
-1. In LaunchDarkly dashboard, go to "Premium Support Banner" flag
-2. Toggle to ON, set Default rule to serve "Available"
-3. Click "Review and save"
-4. Watch your browser—the purple banner appears within 1-2 seconds (no refresh needed)
-
-**Roll it back:**
-1. Toggle flag OFF in LaunchDarkly
-2. Banner disappears instantly
-
-**Why this matters:** In a production incident, an on-call engineer can disable a problematic feature in seconds without touching code, waiting for CI/CD, or coordinating a deployment.
-
-### Instant Rollback (Change Listener)
-
-The demo implements LaunchDarkly's real-time streaming connection. Keep your browser window visible, toggle the flag ON/OFF in LaunchDarkly, and watch the banner appear/disappear in real-time.
-
-**Business value:** Instant feature releases and rollbacks without redeploying code, restarting servers, forcing users to refresh browsers, or coordination delays between teams.
-
-### Emergency Remediation (Kill Switch)
-
-LaunchDarkly's trigger feature enables automated flag control via API.
-
-**Setup:**
-1. In LaunchDarkly, go to flag's "Configuration in environment" (three-dot menu on Test environment)
-2. Scroll to Triggers section, click "+ Add trigger"
-3. Type: Generic trigger, Action: Update flag targeting to OFF
-4. Save and copy the trigger URL
-
-**Test:**
+### 4. Start the Local Server
 ```bash
-curl -X POST "https://app.launchdarkly.com/webhook/triggers/[your-trigger-id]"
+python3 -m http.server 8000
 ```
 
-Watch the banner disappear within 2 seconds.
+### 5. Open the Application
 
-**Production integration:**
-In a real implementation, this trigger URL would be called by PagerDuty runbooks (automatic remediation when alerts fire), Datadog monitors (disable feature if error rates spike), Jira Service Management (kill switch when P1 incidents are created), or Slack bots (`/killswitch` commands for on-call engineers).
+Navigate to: `http://localhost:8000`
 
-**MTTR impact:**
-- Traditional: Alert fires → engineer wakes up → investigates → writes hotfix → tests → deploys → 2+ hours
-- With LaunchDarkly: Alert fires → automation calls trigger → feature disabled → 2 seconds
+You should see:
+- ABC Company landing page
+- Blue helper banner with test URLs
+- Debug panel (bottom right) showing "Connected to LaunchDarkly"
 
 ---
 
-## Part 2: Targeted Rollouts
+## LaunchDarkly Project Setup
 
-### Setting Up Targeting Rules
+### Create the Feature Flag
 
-**In LaunchDarkly dashboard:**
+1. In LaunchDarkly dashboard, click **"Create flag"**
+2. Configure the flag:
+   - **Name:** Premium Support Banner
+   - **Key:** `premium-support-banner` (must match exactly)
+   - **Flag type:** Boolean
+   - **Variations:**
+     - Variation 1: Name = "Available", Value = `true`
+     - Variation 2: Name = "Unavailable", Value = `false`
+3. Click **"Save flag"**
 
-1. Individual Targeting: Add `john@abccompany.com`, serve Available
+### Configure Part 1: Basic Flag Control
 
-2. Rule 1 - Internal Team:
-   - Name: "Internal Team Members"
-   - IF user.userRole is one of: `internal`
-   - THEN serve: Available
+1. Go to the flag's **Targeting** tab
+2. Set **Default rule** to serve "Unavailable"
+3. **Turn the flag OFF** (toggle at top)
+4. Click **"Review and save"**
 
-3. Rule 2 - Beta Testers:
-   - Name: "Beta Program Participants"
-   - IF user.betaTester is one of: `true`
-   - THEN serve: Available
+**Test it:**
+- With flag OFF: Banner should be hidden
+- Turn flag ON, set default to "Available": Banner appears within 2 seconds (no page reload)
+- Turn flag OFF: Banner disappears instantly
 
-4. Default Rule: ELSE serve: Unavailable
+---
 
-5. Turn the flag ON
+## Part 1: Emergency Kill Switch Setup
 
-### Testing Different User Scenarios
+### Create a Trigger
 
-The demo uses URL parameters to simulate different user contexts:
+1. On the flag page, click the **three-dot menu** next to "Test" environment
+2. Select **"Configuration in environment"**
+3. Scroll to **"Triggers"** section
+4. Click **"+ Add trigger"**
+5. Configure:
+   - **Trigger type:** Generic trigger
+   - **Action:** Update flag targeting to OFF
+6. Click **"Save"**
+7. **Copy the trigger URL** (you'll need this for testing)
 
-**Regular customer (no banner):**
+### Test the Kill Switch
+```bash
+# Replace with your actual trigger URL
+curl -X POST "https://app.launchdarkly.com/webhook/triggers/[your-trigger-id]/[your-trigger-secret]"
+```
+
+**Expected result:** Banner disappears from the page within 2 seconds.
+
+---
+
+## Part 2: Targeted Rollouts Setup
+
+### Configure Individual Targeting
+
+1. On the flag's **Targeting** tab, ensure flag is **ON**
+2. Click the **"+"** button at the top
+3. Select **"Target individuals"**
+4. Add individual target:
+   - **Context key:** `john@abccompany.com`
+   - **Kind:** user
+   - **Variation:** Available
+5. Click **"Add"**
+
+### Configure Rule-Based Targeting
+
+**Rule 1: Internal Team Members**
+
+1. Click **"+ Add rule"** → **"Build a custom rule"**
+2. Configure:
+   - **Name:** Internal Team Members
+   - **Context kind:** user
+   - **Attribute:** `userRole`
+   - **Operator:** is one of
+   - **Values:** `internal`
+3. In the dropdown below, select **"Available"**
+4. Click outside to save the rule
+
+**Rule 2: Beta Program Participants**
+
+1. Click **"+ Add rule"** → **"Build a custom rule"**
+2. Configure:
+   - **Name:** Beta Program Participants
+   - **Context kind:** user
+   - **Attribute:** `betaTester`
+   - **Operator:** is one of
+   - **Values:** `true` (select "bool" type from dropdown)
+3. In the dropdown below, select **"Available"**
+4. Click outside to save the rule
+
+### Set Default Rule
+
+1. Scroll to **"Default rule"** section
+2. Set to serve: **Unavailable**
+3. Click **"Review and save"**
+
+---
+
+## Testing Targeting Rules
+
+The application uses URL parameters to simulate different user contexts:
+
+### Test Scenarios
+
+**Regular customer (banner hidden):**
 ```
 http://localhost:8000?role=customer
 ```
+- Debug panel shows: Role: customer, Beta: No
+- Expected: Banner hidden (falls through to default rule)
 
-**Internal team member (sees banner):**
+**Internal team member (banner visible):**
 ```
 http://localhost:8000?role=internal
 ```
+- Debug panel shows: Role: internal, Beta: No
+- Expected: Banner visible (matches Rule 1)
 
-**Beta tester (sees banner):**
+**Beta tester (banner visible):**
 ```
 http://localhost:8000?beta=true
 ```
+- Debug panel shows: Role: customer, Beta: Yes
+- Expected: Banner visible (matches Rule 2)
 
-**Specific individual (sees banner):**
+**Specific individual (banner visible):**
 ```
 http://localhost:8000?email=john@abccompany.com
 ```
+- Debug panel shows: Email: john@abccompany.com
+- Expected: Banner visible (matches individual targeting)
 
-### Production Context Sources
+---
 
-In a real application, user attributes come from:
-- Authentication layer (JWT tokens from Okta, Auth0, etc.)
-- Database lookups (user profiles, subscription data)
-- CRM integration (Salesforce, HubSpot)
+## How It Works
 
-Example:
+### User Context
+
+The application creates a user context with attributes for targeting:
 ```javascript
 const context = {
     kind: 'user',
-    key: session.userId,
-    email: jwt.email,
-    userRole: jwt.role,              // From identity provider
-    betaTester: user.betaProgramFlag, // From database
-    accountTier: user.subscription,   // From Stripe
-    company: user.organization        // From CRM
+    key: userEmail,
+    email: userEmail,
+    userRole: 'internal' | 'customer',
+    betaTester: true | false,
+    company: 'ABC Company'
 };
 ```
 
-### Why Targeting Matters
+In production, these attributes would come from:
+- Authentication tokens (JWT from Okta, Auth0)
+- Database user profiles
+- CRM systems (Salesforce, HubSpot)
 
-ABC Company's phased rollout:
-- Week 1: Internal dogfooding (userRole = "internal") - 20 internal users test in production, find UX issues, zero customer exposure
-- Week 2: Beta program (betaTester = true) - 50 enterprise customers provide feedback, measure conversion
-- Week 3: Gradual rollout - 10% → 50% → 100% of customers
+### Flag Evaluation
 
-At each stage, if metrics decline or errors spike, roll back instantly to previous cohort.
+LaunchDarkly evaluates flags in this order:
 
----
+1. **Individual targets** - If user email matches, serve specified variation
+2. **Targeting rules** (top to bottom) - If user matches rule conditions, serve rule variation
+3. **Default rule** - If no matches, serve default variation
 
-## Enterprise Integration Opportunities
+### Real-Time Updates
 
-While not implemented in this demo, production deployment would integrate LaunchDarkly with existing enterprise tooling:
+The application uses LaunchDarkly's streaming connection:
+```javascript
+ldClient.on('change:premium-support-banner', function(newValue) {
+    checkFlagAndUpdateBanner(); // Updates UI without page reload
+});
+```
 
-### ITSM Integration (Jira Service Management)
-
-**Incident response workflow:**
-Customer reports banner breaking mobile layout → Support creates P1 incident in Jira → Jira Automation rule triggers → Automation calls LaunchDarkly trigger URL → Banner disabled across all users in 2 seconds → Engineering investigates without time pressure → Fix deployed, flag re-enabled when ready.
-
-**Configuration:** Jira Automation webhook → LaunchDarkly trigger URL. No code changes, no deployment pipelines involved.
-
-**Business value:** Empowers support team to resolve incidents autonomously. Engineers focus on fixing root cause, not firefighting. Customer impact minimized (seconds vs hours).
-
-### Observability Integration
-
-Automated performance monitoring: IF error_rate > 5% for feature "premium-banner" THEN call LaunchDarkly trigger. Feature auto-disables before customers notice.
-
-### Collaboration Integration
-
-On-call engineer tools via Slack: `/killswitch premium-banner`, `/flag-status premium-banner`, `/flag-enable premium-banner beta`. Engineers control flags without leaving incident response chat.
-
-### CI/CD Integration
-
-Automated deployment pipeline: Merge PR → CI runs tests → Deploy to production with flag OFF → Smoke tests pass → Flag auto-enabled for internal team → Manual approval required for full rollout. Zero-downtime deployments with automatic safeguards.
+Changes in LaunchDarkly dashboard appear in the browser within 1-2 seconds.
 
 ---
 
-## Technical Details
-
-**Tech Stack:**
-- Frontend: Vanilla JavaScript, HTML5, CSS3
-- LaunchDarkly SDK: JavaScript client-side SDK v3
-- Server: Python 3 http.server (for local development)
-
-**How it works:**
-1. SDK initializes with user context
-2. Opens streaming connection to LaunchDarkly servers
-3. Evaluates flags based on targeting rules
-4. Updates UI when flags change (real-time via Server-Sent Events)
-5. Falls back to safe defaults if LaunchDarkly unavailable
-
-**File structure:**
+## Project Structure
 ```
 launchdarkly-demo/
-├── index.html    # Application with LaunchDarkly integration
-└── README.md     # This file
+├── index.html          # Single-page application with LaunchDarkly integration
+└── README.md           # This file
 ```
 
-**Security:**
-- Uses Client-side ID (safe for browser code)
-- Server-side SDK Key is never exposed
-- User attributes encrypted in transit
+### Key Code Sections
+
+**LaunchDarkly SDK initialization (line ~255):**
+```javascript
+const ldClient = LDClient.initialize(clientSideID, context);
+```
+
+**Flag evaluation (line ~285):**
+```javascript
+const showBanner = ldClient.variation('premium-support-banner', false);
+```
+
+**Change listener (line ~275):**
+```javascript
+ldClient.on('change:premium-support-banner', function(newValue) {
+    // Handle flag changes
+});
+```
 
 ---
 
-## Assignment Completion
+## Troubleshooting
 
-**Part 1: Release & Remediate**
-- Feature flag implemented
-- Instant toggle without page reload (change listener working)
-- Emergency kill switch via trigger URL
+**Banner doesn't appear when flag is ON:**
+- Verify the flag key is exactly `premium-support-banner`
+- Check browser console for LaunchDarkly connection status
+- Confirm Client-side ID is correct (not SDK key)
+- Ensure flag is ON in LaunchDarkly dashboard
+- Check that Default rule serves "Available" (not "Unavailable")
 
-**Part 2: Targeted Rollouts**
-- User context with custom attributes
-- Individual targeting (by email)
-- Rule-based targeting (by role, beta status)
+**Targeting not working:**
+- Verify you've turned the flag ON globally
+- Check that targeting rules are saved
+- Ensure boolean values use "bool" type (not string)
+- Confirm user context attributes match rule conditions exactly
 
-**Documentation**
-- Setup instructions with environment assumptions
-- Code comments explaining SDK integration
-- Business context and value proposition
+**Trigger doesn't disable flag:**
+- Verify trigger URL is complete (includes both ID and secret)
+- Check that trigger action is set to "Update flag targeting to OFF"
+- Ensure you're using POST method in curl command
+
+**Debug Panel shows "Connection failed":**
+- Verify Client-side ID is correct
+- Check network connectivity
+- Ensure you're not using Server-side SDK key by mistake
 
 ---
 
@@ -296,6 +309,24 @@ launchdarkly-demo/
 
 - [LaunchDarkly Documentation](https://docs.launchdarkly.com/)
 - [JavaScript SDK Reference](https://docs.launchdarkly.com/sdk/client-side/javascript)
-- [Feature Flagging Best Practices](https://launchdarkly.com/blog/)
+- [Targeting Rules Guide](https://docs.launchdarkly.com/home/flags/targeting-rules)
+- [Feature Flag Best Practices](https://launchdarkly.com/blog/)
 
-Questions? I'm happy to walk through the implementation or discuss how LaunchDarkly solves enterprise feature management challenges.
+---
+
+## Assignment Completion
+
+**Part 1: Release & Remediate** ✓
+- Feature flag implementation
+- Real-time flag listener (no page reload)
+- Emergency trigger for instant remediation
+
+**Part 2: Targeted Rollouts** ✓
+- User context with custom attributes
+- Individual targeting (by email)
+- Rule-based targeting (by role and beta status)
+
+**Documentation** ✓
+- Complete setup instructions
+- LaunchDarkly project configuration steps
+- Testing procedures and expected results
